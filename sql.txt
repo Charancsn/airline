@@ -1,0 +1,417 @@
+
+mysql> use airline;
+Database changed
+mysql> create table Aircrafts(
+    ->
+    -> AcID int Primary Key,
+    ->
+    -> AcNumber varchar(32) NOT NULL,Capacity int NOT NULL,MfdBy varchar(128) NOT NULL,
+    ->
+    -> MfdOn Datetime NOT NULL);
+Query OK, 0 rows affected (0.55 sec)
+
+mysql> describe airline;
+ERROR 1146 (42S02): Table 'airline.airline' doesn't exist
+mysql> describe Aircrafts;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| AcID     | int          | NO   | PRI | NULL    |       |
+| AcNumber | varchar(32)  | NO   |     | NULL    |       |
+| Capacity | int          | NO   |     | NULL    |       |
+| MfdBy    | varchar(128) | NO   |     | NULL    |       |
+| MfdOn    | datetime     | NO   |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+5 rows in set (0.12 sec)
+
+mysql> insert into Aircrafts values(1,"NTR 123",125,"kingfisher","23 November 1874");
+ERROR 1292 (22007): Incorrect datetime value: '23 November 1874' for column 'MfdOn' at row 1
+mysql> insert into Aircrafts values(1,"NTR 123",125,"kingfisher","1874-12-12 02:01:01");
+Query OK, 1 row affected (0.13 sec)
+
+mysql> show Aircrafts;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Aircrafts' at line 1
+mysql> select * from Aircrafts;
++------+----------+----------+------------+---------------------+
+| AcID | AcNumber | Capacity | MfdBy      | MfdOn               |
++------+----------+----------+------------+---------------------+
+|    1 | NTR 123  |      125 | kingfisher | 1874-12-12 02:01:01 |
++------+----------+----------+------------+---------------------+
+1 row in set (0.07 sec)
+
+mysql> create table Route( RtID int ,Airport varchar(32) NOT NULL,Destination varchar(16) NOT NULL, Rtcode varchar(16) NOT NULL UNIQUE, primary Key (RtID));
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> insert into Route values(1,"vijayawada","chennai","VIJ-CHI");
+Query OK, 1 row affected (0.09 sec)
+
+mysql> create table flight_schedule(FiID int,flightdate DATETIME,
+    ->
+    ->                              Departure DATETIME,
+    ->
+    ->                              Arrival DATETIME,
+    ->
+    ->                              AirCraft int,
+    ->
+    ->                              NetFare int,PRIMARY KEY(FiID),
+    ->
+    ->                             CONSTRAINT fk_Aircraft FOREIGN KEY(Aircraft)REFERENCES Aircrafts(AcID));
+Query OK, 0 rows affected (0.16 sec)
+
+mysql> insert into Flight_schedule values(1,"january 23,2013","23:20","1:20",1,1);
+ERROR 1292 (22007): Incorrect datetime value: 'january 23,2013' for column 'flightdate' at row 1
+mysql> insert into Flight_schedule values(1,"2013-12-12","23:20","1:20",1,1);
+ERROR 1292 (22007): Incorrect datetime value: '23:20' for column 'Departure' at row 1
+mysql> insert into Flight_schedule values(1,"2013-12-12 23:20","1:20",1,1);
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+mysql> insert into Flight_schedule values(1,"2013-12-12 23:20:12","2015-12-08 1:20:56",1,1);
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+mysql> insert into Flight_schedule values(1,"2013-12-12 23:20:12","2015-12-08 1:20:56","2013-09-09 01:01:01",1,1);
+Query OK, 1 row affected (0.07 sec)
+
+mysql> select * from Aircrafts;
++------+----------+----------+------------+---------------------+
+| AcID | AcNumber | Capacity | MfdBy      | MfdOn               |
++------+----------+----------+------------+---------------------+
+|    1 | NTR 123  |      125 | kingfisher | 1874-12-12 02:01:01 |
++------+----------+----------+------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from flight_schedule;
++------+---------------------+---------------------+---------------------+----------+---------+
+| FiID | flightdate          | Departure           | Arrival             | AirCraft | NetFare |
++------+---------------------+---------------------+---------------------+----------+---------+
+|    1 | 2013-12-12 23:20:12 | 2015-12-08 01:20:56 | 2013-09-09 01:01:01 |        1 |       1 |
++------+---------------------+---------------------+---------------------+----------+---------+
+1 row in set (0.00 sec)
+
+mysql> select * from route;
++------+------------+-------------+---------+
+| RtID | Airport    | Destination | Rtcode  |
++------+------------+-------------+---------+
+|    1 | vijayawada | chennai     | VIJ-CHI |
++------+------------+-------------+---------+
+1 row in set (0.00 sec)
+
+mysql> create table Discount(DiID int PRIMARY KEY,Title varchar(32),Amount int,Description varchar(250));
+Query OK, 0 rows affected (0.17 sec)
+
+mysql> insert into Discount values(1,"children",10,"Discount is provide all children under age of 10");
+Query OK, 1 row affected (0.04 sec)
+
+mysql> create table charges(ChID int PRIMARY KEY,Title varchar(32),Amount int,Description varchar(260) );
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> insert into Charges values(1,"urgent cancellation",33.33,"33.3% will be charged for cancellation for booking within 11 hours for Flight time");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> create table state(StID int,
+    ->
+    ->                    statename varchar(32),
+    ->
+    ->                    Primary Key(StID));
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> insert into State values(1,"tamilnadu");
+Query OK, 1 row affected (0.07 sec)
+
+mysql> create table Contact_Details(CnID int PRIMARY KEY,
+    ->
+    ->                             Email varchar(16) NOT NULL,
+    ->
+    ->                             Cell varchar(16) NOT NULL,
+    ->
+    ->                             Tel varchar(16),Street varchar(64),
+    ->
+    ->                             State int NOT NULL,
+    ->
+    ->                             CONSTRAINT fk_State FOREIGN KEY(State) REFERENCES State(StID));
+Query OK, 0 rows affected (0.18 sec)
+
+mysql> insert into Contact_Details values(1,"v1@gmail.com","9737285","01-9823562","nagar road",1);
+Query OK, 1 row affected (0.09 sec)
+
+mysql> create table Passengers(PsID int PRIMARY KEY,
+    ->
+    ->                        Name varchar(32) NOT NULL,
+    ->
+    ->                        Address varchar(64) NOT NULL,
+    ->
+    ->                        Age int NOT NULL,
+    ->
+    ->                        Nationality varchar(16) NOT NULL,
+    ->
+    ->                        Contacts int NOT NULL,
+    ->
+    ->                        CONSTRAINT fk_Contacts FOREIGN KEY(Contacts)REFERENCES Contact_Details(CnID));
+Query OK, 0 rows affected (0.20 sec)
+
+mysql> insert into Passengers values(1,"Tharak","nijamvoly colony",35,"indain",1);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passenger int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges NULL,
+    ->
+    ->                          Discount NULL,
+    ->
+    ->                          CONSTRAINT fk_Passenger FOREIGN KEY(Passenger)REFERENCES Passenger(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FlID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL,
+
+                         Discount NULL,
+
+                         CONST' at line 11
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passenger int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges NULL,
+    ->
+    ->                          Discount NULL,
+    ->
+    ->                          CONSTRAINT fk_Passenger FOREIGN KEY(Passenger)REFERENCES Passenger(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FlID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL,
+
+                         Discount NULL,
+
+                         CONST' at line 11
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passenger int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges NOT NULL,
+    ->
+    ->                          Discount NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passenger FOREIGN KEY(Passenger)REFERENCES Passenger(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FlID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NOT NULL,
+
+                         Discount NOT NULL,
+
+                      ' at line 11
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passenger int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passenger FOREIGN KEY(Passenger)REFERENCES Passenger(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FlID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1824 (HY000): Failed to open the referenced table 'passenger'
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FlID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 3734 (HY000): Failed to add the foreign key constraint. Missing column 'FlID' for constraint 'fk_Flight' in the referenced table 'flight_schedule'
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATETIME,
+    ->
+    ->                          DepartureDate DATETIME,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FiID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> insert into Transactions3 values(1,"23 july 2022","26 august 2022",1,1,NULL,NULL);
+ERROR 1146 (42S02): Table 'airline.transactions3' doesn't exist
+mysql>                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID))' at line 1
+mysql> create table Transactions(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATE,
+    ->
+    ->                          DepartureDate DATE,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FiID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1050 (42S01): Table 'transactions' already exists
+mysql> create table Transaction(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATE,
+    ->
+    ->                          DepartureDate DATE,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NOT NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FiID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1826 (HY000): Duplicate foreign key constraint name 'fk_Passengers'
+mysql>                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID))' at line 1
+mysql> insert into Transactions values(1,"2022-05-04 01:02:00","2022-08-04 01:02:60",1,1,NULL,NULL);
+ERROR 1292 (22007): Incorrect datetime value: '2022-08-04 01:02:60' for column 'DepartureDate' at row 1
+mysql> insert into Transactions values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,NULL,NULL);
+ERROR 1048 (23000): Column 'Discount' cannot be null
+mysql> create table Transactions01(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATE,
+    ->
+    ->                          DepartureDate DATE,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          Charges int NULL,
+    ->
+    ->                          Discount int NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FiID),
+    ->
+    ->                          CONSTRAINT fk_Charges FOREIGN KEY(Charges)REFERENCES Charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+ERROR 1826 (HY000): Duplicate foreign key constraint name 'fk_Passengers'
+mysql> insert into Transactions01 values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,10,NULL);
+ERROR 1146 (42S02): Table 'airline.transactions01' doesn't exist
+mysql> insert into Transactions values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,10,NULL);
+ERROR 1048 (23000): Column 'Discount' cannot be null
+mysql>
+mysql>  insert into Transactions values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,100,10);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`airline`.`transactions`, CONSTRAINT `fk_Charges` FOREIGN KEY (`Charges`) REFERENCES `charges` (`ChID`))
+mysql> drop table Transactions;
+Query OK, 0 rows affected (0.16 sec)
+
+mysql> create table Transactions01(TsID int PRIMARY KEY,
+    ->
+    ->                          Booking_Date DATE,
+    ->
+    ->                          DepartureDate DATE,
+    ->
+    ->                          Passengers int,
+    ->
+    ->                          Flight int,
+    ->
+    ->                          charges int NULL,
+    ->
+    ->                          Discount int NULL,
+    ->
+    ->                          CONSTRAINT fk_Passengers FOREIGN KEY(Passengers)REFERENCES Passengers(PsID),
+    ->
+    ->                          CONSTRAINT fk_Flight FOREIGN KEY(Flight)REFERENCES Flight_Schedule(FiID),
+    ->
+    ->                          CONSTRAINT fk_charges FOREIGN KEY(charges)REFERENCES charges(ChID),
+    ->
+    ->                          CONSTRAINT fk_Discount FOREIGN KEY(Discount)REFERENCES Discount(DiID));
+Query OK, 0 rows affected (0.25 sec)
+
+mysql> insert into Transactions01 values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,100,10);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`airline`.`transactions01`, CONSTRAINT `fk_charges` FOREIGN KEY (`charges`) REFERENCES `charges` (`ChID`))
+mysql> insert into Transactions01 values(1,"2022-05-04 01:02:00","2022-08-04 01:02:02",1,1,NULL,NULL);
+Query OK, 1 row affected, 2 warnings (0.01 sec)
+
+mysql> select * from Transactions01;
++------+--------------+---------------+------------+--------+---------+----------+
+| TsID | Booking_Date | DepartureDate | Passengers | Flight | charges | Discount |
++------+--------------+---------------+------------+--------+---------+----------+
+|    1 | 2022-05-04   | 2022-08-04    |          1 |      1 |    NULL |     NULL |
++------+--------------+---------------+------------+--------+---------+----------+
+1 row in set (0.00 sec)
